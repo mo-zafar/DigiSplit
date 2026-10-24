@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DigiSplit — Smart POS Terminal Demo</title>
+  
+  <!-- Google Fonts: Abril Fatface, Poppins, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Ambient Slide Background Graphics (from PPT) -->
+  <div class="slide-decorations" aria-hidden="true">
+    <img src="assets/ribbon-top.svg" class="decor-ribbon-top" alt="">
+    <img src="assets/soundwave.svg" class="decor-soundwave" alt="">
+    <img src="assets/concentric-circles.svg" class="decor-circles" alt="">
+  </div>
+
+  <!-- Top Slide Branding Header -->
+  <header class="slide-header">
+    <div class="header-inner">
+      <div class="brand-block">
+        <span class="brand-digi">Digi</span><span class="brand-split">Split</span>
+        <span class="brand-badge">SMART POS TERMINAL</span>
+      </div>
+      <div class="header-subtitle">
+        Turning a shared bill into one auditable order
+      </div>
+    </div>
+    <div class="copper-rule"></div>
+  </header>
+
+  <!-- Main POS Terminal Presentation Wrapper -->
+  <main class="terminal-stage">
+
+    <!-- Actual Smart Card POS Terminal Hardware Mockup -->
+    <div class="pos-hardware">
+      
+      <!-- Top Thermal Receipt Printer Housing -->
+      <div class="printer-housing">
+        <div class="printer-roll-curve"></div>
+        <div class="printer-slot">
+          <!-- Animated Paper Receipt Slip that feeds out upon approval -->
+          <div class="printer-paper-slip" id="printer-paper-slip">
+            <div class="slip-inner">
+              <div class="slip-title">DIGIPOS RECEIPT</div>
+              <div class="slip-order" id="slip-order-id">ORD-DXB-88421</div>
+              <div class="slip-amt" id="slip-amount">AED 0.00 PAID</div>
+              <div class="slip-cut">------------------</div>
+            </div>
+          </div>
+        </div>
+        <div class="printer-lens-wrap">
+          <div class="printer-led active-green" title="Printer Ready"></div>
+          <div class="nfc-icon-indicator" title="Contactless NFC Sensor">
+            <svg viewBox="0 0 24 24" class="nfc-svg" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 16a5 5 0 0 1 0-8"/>
+              <path d="M10 19a8 8 0 0 1 0-14"/>
+              <path d="M13 22a11 11 0 0 1 0-20"/>
+            </svg>
+            <span>NFC TAP ZONE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Edge Magnetic Card Swipe Groove -->
+      <div class="mag-stripe-groove" title="Magnetic Stripe Reader"></div>
+
+      <!-- Glass Screen Bezel -->
+      <div class="screen-bezel">
+        
+        <!-- Recessed Color Touchscreen -->
+        <div class="pos-screen" id="pos-screen">
+          
+          <!-- Terminal Status Bar -->
+          <div class="screen-status-bar">
+            <div class="status-left">
+              <span class="adib-logo-text">ADIB</span>
+              <span class="status-merchant-name">Café Oasis</span>
+            </div>
+            <div class="status-center" id="pos-clock">19:22</div>
+            <div class="status-right">
+              <span class="status-signal">4G LTE</span>
+              <span class="status-wifi">📶</span>
+              <span class="status-battery">98%</span>
+            </div>
+          </div>
+
+          <!-- ==============================================================
+               TERMINAL SCREEN 1: Enter Total Bill Amount (Starts at 0 AED)
+               ============================================================== -->
+          <div class="screen-view active" id="view-enter-bill">
+            <div class="view-header-bar">
+              <span class="view-title">NEW BILL TRANSACTION</span>
+              <span class="order-tag">Table 04</span>
+            </div>
+
+            <!-- Big Amount Display starting at 0 AED -->
+            <div class="amount-entry-display">
+              <span class="currency-tag">AED</span>
+              <span class="big-entered-amount" id="keypad-display-amount">0.00</span>
+            </div>
+            
+            <div class="bill-vat-note">
+              <span>Includes 5% UAE VAT: <strong id="entry-vat-calc">AED 0.00</strong></span>
+            </div>
+
+            <!-- Touch Keypad (Direct Cashier Entry Only) -->
+            <div class="numeric-keypad">
+              <button class="key-btn" data-key="1">1</button>
+              <button class="key-btn" data-key="2">2</button>
+              <button class="key-btn" data-key="3">3</button>
+              <button class="key-btn" data-key="4">4</button>
+              <button class="key-btn" data-key="5">5</button>
+              <button class="key-btn" data-key="6">6</button>
+              <button class="key-btn" data-key="7">7</button>
+              <button class="key-btn" data-key="8">8</button>
+              <button class="key-btn" data-key="9">9</button>
+              <button class="key-btn key-clear" id="key-clear">C</button>
+              <button class="key-btn" data-key="0">0</button>
+              <button class="key-btn key-back" id="key-back">⌫</button>
+            </div>
+
+            <!-- Two Starting Options: Pay Full Bill OR DigiSplit Bill -->
+            <div class="entry-dual-actions">
+              <button class="btn-entry-option btn-pay-full" id="btn-pay-full" disabled>
+                <span class="eo-icon">💳</span>
+                <span class="eo-text">Pay Full Bill</span>
+                <span class="eo-sub">Single payment</span>
+              </button>
+              
+              <button class="btn-entry-option btn-digisplit" id="btn-proceed-to-split" disabled>
+                <span class="eo-icon">➗</span>
+                <span class="eo-text">DigiSplit Bill</span>
+                <span class="eo-sub">Split among payers</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ==============================================================
+               TERMINAL SCREEN 2: DigiSplit Active Flow
+               ============================================================== -->
+          <div class="screen-view" id="view-split-flow">
+            
+            <!-- Parent Order Meta Banner -->
+            <div class="parent-meta-bar">
+              <div class="meta-left">
+                <span class="parent-label">PARENT ORDER</span>
+                <span class="parent-code" id="active-parent-order-id">ORD-DXB-88421</span>
+              </div>
+              <div class="meta-right">
+                <button class="btn-edit-bill" id="btn-edit-total-bill" title="Change Total Bill Amount">
+                  ✏️ Edit Bill
+                </button>
+              </div>
+            </div>
+
+            <!-- Hero Remaining Balance Card -->
+            <div class="terminal-hero-card">
+              <div class="hero-top-row">
+                <span class="hero-label">Total Order</span>
+                <span class="hero-total-val" id="disp-total-amount">AED 0.00</span>
+              </div>
+
+              <!-- Live Balance Bar -->
+              <div class="progress-track">
+                <div class="progress-fill" id="live-progress-bar" style="width: 0%;"></div>
+              </div>
+
+              <div class="hero-split-summary">
+                <div class="summary-box">
+                  <span class="box-lbl">PAID</span>
+                  <span class="box-val text-green" id="disp-paid-sum">AED 0.00</span>
+                </div>
+                <div class="summary-sep"></div>
+                <div class="summary-box text-right">
+                  <span class="box-lbl">REMAINING TO SETTLE</span>
+                  <span class="box-val text-alert" id="disp-remain-sum">AED 0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Split Modes Row -->
+            <div class="modes-bar">
+              <button class="mode-tab active" data-mode="equal">
+                <span class="m-icon">➗</span>
+                <span class="m-title">Equal</span>
+              </button>
+              <button class="mode-tab" data-mode="amount">
+                <span class="m-icon">💵</span>
+                <span class="m-title">By Amount</span>
+              </button>
+              <button class="mode-tab" data-mode="item">
+                <span class="m-icon">🍽️</span>
+                <span class="m-title">By Item</span>
+              </button>
+              <button class="mode-tab" data-mode="mixed">
+                <span class="m-icon">🔀</span>
+                <span class="m-title">Mixed</span>
+              </button>
+            </div>
+
+            <!-- Mode Config Sub-panel (Editable controls & warning banners) -->
+            <div class="mode-options-panel" id="mode-options-panel">
+              <!-- Dynamically populated by JS -->
+            </div>
+
+            <!-- Payers List Section -->
+            <div class="payers-container">
+              <div class="payers-header">
+                <span class="ph-title" id="payers-header-label">PAYER SHARES</span>
+                <span class="ph-status" id="payers-settled-count">0 of 0 Settled</span>
+              </div>
+              <div class="payers-scroll" id="payers-scroll-list">
+                <!-- Dynamically populated by JS -->
+              </div>
+              
+              <!-- Unpaid Balance Action Card (Appears if existing payers settled but remaining > 0) -->
+              <div class="unpaid-gap-alert hidden" id="unpaid-gap-alert">
+                <div class="gap-text">
+                  <span>⚠️ Unpaid Balance Remaining:</span>
+                  <strong class="text-alert" id="unpaid-gap-amount">AED 0.00</strong>
+                </div>
+                <button class="btn-add-remaining-payer" id="btn-add-remaining-payer">
+                  + Add Payer for Remaining Balance
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="split-footer-actions">
+              <button class="btn-pos-secondary" id="btn-cancel-split">
+                <span>✕</span> Back
+              </button>
+              <button class="btn-pos-primary" id="btn-quick-auto-run">
+                <span>⚡</span> Auto Settle
+              </button>
+            </div>
+
+          </div>
+
+          <!-- ==============================================================
+               TERMINAL SCREEN 3: Payment Step (Tip Prompt + Card vs Cash)
+               ============================================================== -->
+          <div class="screen-view" id="view-payment-step">
+            
+            <div class="payment-step-header">
+              <button class="btn-back-header" id="btn-back-to-split">‹ Back</button>
+              <span class="step-title" id="payment-payer-title">Payer 1</span>
+              <span class="step-spacer"></span>
+            </div>
+
+            <div class="payment-due-card">
+              <span class="due-label">Share Base Amount</span>
+              <span class="due-amount" id="pay-base-due">AED 0.00</span>
+            </div>
+
+            <!-- Tipping Selection -->
+            <div class="tip-section">
+              <span class="section-title-sm">SERVER GRATUITY (Tariq K.)</span>
+              <div class="tip-grid">
+                <button class="tip-pill active" data-pct="0">No Tip<br><small>AED 0.00</small></button>
+                <button class="tip-pill" data-pct="10">10%<br><small id="tip-val-10">+AED 0.00</small></button>
+                <button class="tip-pill" data-pct="15">15%<br><small id="tip-val-15">+AED 0.00</small></button>
+                <button class="tip-pill" data-pct="20">20%<br><small id="tip-val-20">+AED 0.00</small></button>
+              </div>
+            </div>
+
+            <!-- Total to Charge Banner -->
+            <div class="charge-banner">
+              <span>Total to Settle:</span>
+              <strong id="pay-total-charge">AED 0.00</strong>
+            </div>
+
+            <!-- Method Selection: Card vs Cash (NO "CASH TENDER", JUST "CASH") -->
+            <div class="tender-select-section">
+              <span class="section-title-sm">PAYMENT METHOD</span>
+              <div class="tender-btn-grid">
+                <button class="tender-card-btn active" data-method="card">
+                  <span class="tc-icon">💳</span>
+                  <span class="tc-title">Card</span>
+                  <span class="tc-sub">Visa • MC • NFC</span>
+                </button>
+                <button class="tender-card-btn" data-method="cash">
+                  <span class="tc-icon">💵</span>
+                  <span class="tc-title">Cash</span>
+                  <span class="tc-sub">Direct Cash Entry</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Sub-Screen (Shown when Card is chosen) -->
+            <div class="method-subscreen" id="subscreen-card">
+              <div class="nfc-target-box">
+                <div class="nfc-wave-ring"></div>
+                <div class="nfc-wave-ring ring-delay"></div>
+                <div class="nfc-center-icon">
+                  <svg viewBox="0 0 24 24" class="pos-card-svg" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                  </svg>
+                </div>
+                <span class="nfc-instruction">Please Tap Card or Insert Chip</span>
+              </div>
+              <button class="btn-pos-primary btn-action-lg" id="btn-action-tap-card">
+                <span>📲</span> Tap / Insert Card to Settle
+              </button>
+            </div>
+
+            <!-- Cash Sub-Screen (CASHIER ENTERS CASH PAID - NO TAP CARD!) -->
+            <div class="method-subscreen hidden" id="subscreen-cash">
+              <div class="cash-input-box">
+                <div class="cash-due-row">
+                  <span class="cash-lbl">Amount Due:</span>
+                  <strong class="cash-due-val" id="cash-exact-due">AED 0.00</strong>
+                </div>
+
+                <div class="cash-received-row">
+                  <span class="cash-lbl">Cash Paid by Customer:</span>
+                  <div class="cash-input-wrap">
+                    <span class="cur-prefix">AED</span>
+                    <input type="number" step="any" class="cash-amount-input" id="cash-entered-input" placeholder="0.00">
+                  </div>
+                </div>
+
+                <!-- Quick Tender Helpers: Exact Amount, +10, +50, +100 -->
+                <div class="cash-quick-helpers">
+                  <button class="btn-helper" id="btn-helper-exact">Exact</button>
+                  <button class="btn-helper" data-add="10">+10</button>
+                  <button class="btn-helper" data-add="50">+50</button>
+                  <button class="btn-helper" data-add="100">+100</button>
+                </div>
+
+                <div class="cash-change-display" id="cash-change-box">
+                  <span id="cash-status-label">Change Due:</span>
+                  <strong id="cash-change-val">AED 0.00</strong>
+                </div>
+              </div>
+
+              <!-- Button: Cash Received -->
+              <button class="btn-pos-success btn-action-lg" id="btn-cash-received">
+                <span>✓</span> Cash Received & Approve
+              </button>
+            </div>
+
+          </div>
+
+          <!-- ==============================================================
+               TERMINAL SCREEN 4: Payer Approval Confirmation
+               ============================================================== -->
+          <div class="screen-view" id="view-approved-screen">
+            <div class="approval-center">
+              <div class="pos-check-circle">✓</div>
+              <h3 class="approval-header">Payment Approved!</h3>
+              <span class="approval-auth" id="appr-auth-code">AUTH-892401</span>
+              
+              <div class="appr-receipt-summary">
+                <div class="appr-line">
+                  <span>Payer:</span>
+                  <strong id="appr-payer-lbl">Payer 1</strong>
+                </div>
+                <div class="appr-line">
+                  <span>Method:</span>
+                  <strong id="appr-method-lbl">Visa Contactless</strong>
+                </div>
+                <div class="appr-line">
+                  <span>Total Settled:</span>
+                  <strong class="text-green" id="appr-total-lbl">AED 0.00</strong>
+                </div>
+                <div class="appr-line sep-top" id="appr-change-row" style="display:none;">
+                  <span>Change Given:</span>
+                  <strong class="text-green" id="appr-change-lbl">AED 0.00</strong>
+                </div>
+                <div class="appr-line sep-top" id="appr-balance-row">
+                  <span>Remaining Bill Balance:</span>
+                  <strong class="text-alert" id="appr-balance-lbl">AED 0.00</strong>
+                </div>
+              </div>
+
+              <button class="btn-pos-primary btn-action-lg" id="btn-appr-continue">
+                Next Payer →
+              </button>
+            </div>
+          </div>
+
+          <!-- ==============================================================
+               TERMINAL SCREEN 5: Order Completed & Audited
+               ============================================================== -->
+          <div class="screen-view" id="view-order-closed">
+            <div class="order-closed-banner">
+              <div class="closed-icon">🎉</div>
+              <h2 class="closed-title">Order Fully Settled!</h2>
+              <span class="closed-sub">Consolidated & Synchronized to POS</span>
+            </div>
+
+            <!-- Consolidated Summary Card -->
+            <div class="closed-ledger-card">
+              <div class="cl-row">
+                <span>Parent Order ID:</span>
+                <strong id="cl-parent-id">ORD-DXB-88421</strong>
+              </div>
+              <div class="cl-row">
+                <span>Reconciliation:</span>
+                <strong class="text-green">BALANCED (0 Variance)</strong>
+              </div>
+              <div class="cl-divider"></div>
+
+              <div class="cl-table-header">
+                <span>Payer / Tender</span>
+                <span>Type</span>
+                <span>Total</span>
+              </div>
+              <div class="cl-children-list" id="cl-children-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Terminal Actions: Refund / Print / New Bill -->
+            <div class="closed-actions">
+              <button class="btn-pos-secondary" id="btn-demo-refund">
+                <span>↩️</span> Refund a Specific Card
+              </button>
+              <button class="btn-pos-secondary" id="btn-print-master">
+                <span>🖨️</span> Print Master Slip
+              </button>
+              <button class="btn-pos-primary" id="btn-new-bill">
+                <span>➕</span> Start New Bill
+              </button>
+            </div>
+          </div>
+
+        </div> <!-- /pos-screen -->
+      </div> <!-- /screen-bezel -->
+
+      <!-- Bottom Smartcard Chip Reader Slot -->
+      <div class="chip-slot-housing">
+        <div class="chip-slot">
+          <div class="chip-slot-opening"></div>
+          <div class="chip-card-icon">
+            <div class="arrow-up">▲</div>
+            <span>INSERT CHIP CARD</span>
+          </div>
+        </div>
+        <div class="adib-embossed-logo">ADIB DIGIPOS</div>
+      </div>
+
+    </div> <!-- /pos-hardware -->
+
+  </main>
+
+  <!-- Edit Unequal Amount Modal (For By-Amount and Mixed modes) -->
+  <div class="custom-modal-backdrop" id="amount-edit-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span class="modal-title" id="edit-modal-title">Edit Amount for Payer 1</span>
+        <button class="btn-close-modal" id="btn-close-amount-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-amount-input-wrap">
+          <span class="modal-currency">AED</span>
+          <input type="number" step="any" id="modal-amount-input" class="modal-num-input" placeholder="0.00">
+        </div>
+        <div class="modal-balance-hint" id="modal-balance-hint">
+          Remaining bill balance: AED 0.00
+        </div>
+        <button class="btn-pos-secondary btn-autofill-remain" id="btn-modal-autofill">
+          ⚡ Auto-fill Remaining Balance
+        </button>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-pos-primary" id="btn-save-payer-amount">Save Amount</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="pos-toast" id="pos-toast" role="alert">
+    <span id="toast-text">Message</span>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
